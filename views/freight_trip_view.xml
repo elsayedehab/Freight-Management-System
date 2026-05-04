@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_trip_tree" model="ir.ui.view">
+        <field name="name">freight.trip.tree</field>
+        <field name="model">freight.trip</field>
+        <field name="arch" type="xml">
+            <list string="Freight Trips"
+                  decoration-info="state == 'draft'"
+                  decoration-success="state == 'delivered'"
+                  decoration-primary="state == 'invoiced'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="starting_point_id"/>
+                <field name="destination_id"/>
+                <field name="distance_km"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <field name="total_invoice_amount" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'confirmed'"
+                       decoration-primary="state == 'in_transit'"
+                       decoration-success="state == 'delivered'"
+                       decoration-danger="state == 'invoiced'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_freight_trip_form" model="ir.ui.view">
+        <field name="name">freight.trip.form</field>
+        <field name="model">freight.trip</field>
+        <field name="arch" type="xml">
+            <form string="Freight Trip">
+
+                <header>
+                    <button name="action_send_email_customer"
+                            string="📧 Send to Customer"
+                            type="object"
+                            class="btn-info"
+                            invisible="state == 'draft'"/>
+                    <button name="action_create_customer_invoice"
+                            string="Create Customer Invoice"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'delivered'"
+                            confirm="Are you sure you want to create a customer invoice for this trip?"/>
+
+                    
+
+                    <button name="action_confirm"    string="CONFIRM"      type="object"
+                            invisible="state != 'draft'"      class="oe_highlight"/>
+                    <button name="action_in_transit" string="IN TRANSIT"   type="object"
+                            invisible="state != 'confirmed'"  class="oe_highlight"/>
+                    <button name="action_delivered"  string="DELIVERED"    type="object"
+                            invisible="state != 'in_transit'" class="oe_highlight"/>
+                    <button name="action_draft"      string="RESET TO DRAFT" type="object"
+                            invisible="state == 'draft'"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,in_transit,delivered,invoiced"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart Buttons -->
+                 
+                        <button name="action_view_invoices"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                invisible="invoice_count == 0">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_view_sale_order"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-shopping-cart"
+                                invisible="not sale_order_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Sales Order</span>
+                            </div>
+                        </button> 
+                    
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <!-- Route & Carrier Info -->
+                    <group>
+                        <group string="Route Info">
+                            <field name="starting_point_id"/>
+                            <field name="destination_id"/>
+                            <field name="distance_km"/>
+                        </group>
+                        <group string="Carrier Info">
+                            <field name="driver_id" options="{'no_create': False}"/>
+                            <field name="driver_phone" readonly="1"/>
+                            <field name="vehicle_id" options="{'no_create': False}"/>
+                            <field name="license_plate" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Customer Billing -->
+                    <group string="Customer Billing" name="customer_billing">
+                        <group>
+                            <field name="partner_id" options="{'no_create': False}" required="1"/>
+                            <field name="freight_charge" required="1"/>
+                            <field name="additional_services_amount"/>
+                            
+                        </group>
+                        <group>
+                            <field name="total_invoice_amount" readonly="1"/>
+                            <field name="invoice_count" readonly="1" string="Number of Invoices"/>
+                            <field name="invoice_state" widget="badge" readonly="1"/>
+                            <!-- <field name="sale_order_id" readonly="1"/> -->
+                        </group>
+                    </group>
+
+                    <!-- Notebook -->
+                    <notebook>
+                        <page string="Customs &amp; Shipment Info" name="customs_info">
+                            <group string="Shipment Info">
+                                <group>
+                                    <field name="cargo_type"/>
+                                    <field name="weight_kg"/>
+                                </group>
+                                <group>
+                                    <field name="container_no"/>
+                                </group>
+                            </group>
+                            <!-- <group>
+                                <field name="declaration_no"/>
+                                <field name="customs_card_no"/>
+                            </group> -->
+                        </page>
+
+                        <!-- Safety & Compliance — attachments بدل checkboxes -->
+                        <page string="Safety &amp; Compliance" name="safety_compliance">
+                            <group>
+                                <group string="Vehicle Checks">
+                                    <field name="tyre_pressure_check_doc"
+                                           widget="many2many_binary"/>
+                                    <field name="brake_lights_doc"
+                                           widget="many2many_binary"/>
+                                    <field name="oil_level_doc"
+                                           widget="many2many_binary"/>
+                                </group>
+                                <group string="Safety Gear">
+                                    <field name="fire_extinguisher_doc"
+                                           widget="many2many_binary"/>
+                                    <field name="emergency_triangle_doc"
+                                           widget="many2many_binary"/>
+                                    <field name="first_aid_kit_doc"
+                                           widget="many2many_binary"/>
+                                    <field name="barriers_doc" widget="many2many_binary"
+                                        string="Barriers"/>
+                                    <field name="cargo_cover_doc" widget="many2many_binary"
+                                        string="Cargo Cover"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Signatures">
+                            <group>
+                                <field name="supervisor_signature"
+                                       widget="signature"
+                                       string="Supervisor Signature"/>
+                                <field name="supervisor_signature_date"
+                                       readonly="1"
+                                       force_save="1"/>
+                            </group>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- KANBAN VIEW -->
+    <record id="view_freight_trip_kanban" model="ir.ui.view">
+        <field name="name">freight.trip.kanban</field>
+        <field name="model">freight.trip</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="starting_point_id"/>
+                <field name="destination_id"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card">
+                            <div class="row mb-2">
+                                <div class="col-12">
+                                    <strong><field name="name"/></strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div><strong>Customer: </strong><field name="partner_id"/></div>
+                                    <div><strong>From: </strong><field name="starting_point_id"/></div>
+                                    <div><strong>To: </strong><field name="destination_id"/></div>
+                                    <div><strong>Distance: </strong><field name="distance_km"/> KM</div>
+                                    <div><strong>Driver: </strong><field name="driver_id"/></div>
+                                    <div><strong>Vehicle: </strong><field name="vehicle_id"/></div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12 text-end">
+                                    <field name="state" widget="label_selection"
+                                           options="{'classes': {
+                                               'draft': 'default',
+                                               'confirmed': 'info',
+                                               'in_transit': 'warning',
+                                               'delivered': 'success',
+                                               'invoiced': 'primary'
+                                           }}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_trip_search" model="ir.ui.view">
+        <field name="name">freight.trip.search</field>
+        <field name="model">freight.trip</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <separator/>
+                <filter string="Status"   name="group_by_state"
+                        context="{'group_by': 'state'}"/>
+                <filter string="Customer" name="group_by_customer"
+                        context="{'group_by': 'partner_id'}"/>
+                <filter string="Driver"   name="group_by_driver"
+                        context="{'group_by': 'driver_id'}"/>
+                <filter string="Vehicle"  name="group_by_vehicle"
+                        context="{'group_by': 'vehicle_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_freight_trip" model="ir.actions.act_window">
+        <field name="name">Freight Trips</field>
+        <field name="res_model">freight.trip</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Freight Trip!
+            </p>
+        </field>
+    </record>
+
+</odoo>
