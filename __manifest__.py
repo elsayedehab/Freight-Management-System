@@ -11,18 +11,14 @@
     "depends": ["base", "fleet", "mail", "hr", "accountant", "account", "web","sale","sale_management"],
     "data": [
         'data/ir_sequence_data.xml',
-        'data/mail_template_data.xml',
         'security/ir.model.access.csv',
         'views/freight_trip_view.xml',
-        'views/trip_expense.xml',
         'views/driver_advance_view.xml',
-        'views/res_config_settings_views.xml',
-        "wizard/send_mail_view.xml",
-        'views/menu_item_view.xml',
-
-
-
         
+
+
+
+
     ],
     "assets": {
         
