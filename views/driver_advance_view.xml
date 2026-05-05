@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_driver_advance_tree" model="ir.ui.view">
+        <field name="name">driver.advance.tree</field>
+        <field name="model">driver.advance</field>
+        <field name="arch" type="xml">
+            <list string="Driver Advances"
+                  decoration-info="state == 'in_settlement'"
+                  decoration-success="state == 'paid'"
+                  decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="trip_id"/>
+                <field name="driver_id"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'in_settlement'"
+                       decoration-success="state == 'paid'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_driver_advance_form" model="ir.ui.view">
+        <field name="name">driver.advance.form</field>
+        <field name="model">driver.advance</field>
+        <field name="arch" type="xml">
+            <form string="Driver Advance">
+
+                <header>
+                    <button name="action_disburse_advance"
+                            string="Disburse Advance"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <!-- CASE 2: In Settlement + Company owes Driver -->
+                    <button name="action_pay_driver_balance"
+                            string="Pay Driver Balance"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="not (state == 'in_settlement' and difference_type == 'in_favor_driver')"/>
+
+                    <!-- CASE 3: In Settlement + Driver owes Company -->
+                    <button name="action_collect_driver_refund"
+                            string="Collect Driver Refund"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="not (state == 'in_settlement' and difference_type == 'in_favor_company')"/>
+
+
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            invisible="state in ('paid','rejected','draft')"/>
+
+                    <button name="action_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            invisible="state != 'rejected'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_settlement,paid"/>
+                </header>
+
+                <sheet>
+                    <div class="alert alert-success"
+                         invisible="state != 'paid'"
+                         style="text-align:center;">
+                        <strong>Fully Settled</strong>
+                    </div>
+
+                    <div class="alert alert-danger"
+                         invisible="state != 'rejected'"
+                         style="text-align:center;">
+                        <strong>Rejected</strong>
+                    </div>
+
+                    <div class="alert alert-success"
+                         invisible="difference_type != 'in_favor_driver'"
+                         style="text-align:center; font-size:15px;">
+                        <strong>⬆ Company owes Driver: </strong>
+                        <field name="expense_difference" widget="monetary" nolabel="1"
+                               style="font-size:17px; color:#27ae60; font-weight:bold;"/>
+                    </div>
+
+                    <div class="alert alert-warning"
+                         invisible="difference_type != 'in_favor_company'"
+                         style="text-align:center; font-size:15px;">
+                        <strong>⬇ Driver owes Company: </strong>
+                        <field name="expense_difference" widget="monetary" nolabel="1"
+                               style="font-size:17px; color:#e67e22; font-weight:bold;"/>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Trip and Driver Info">
+                            <field name="trip_id"
+                                   options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="driver_id" readonly="1"/>
+                            <field name="disbursed_by" readonly="1"/>
+                        </group>
+                        <group string="Financial Info">
+                            <field name="amount"
+                                   readonly="state != 'draft'"/>
+                            <field name="payment_account_id" readonly="state != 'draft'"/>
+                            <field name="currency_id"
+                                   options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Dates">
+                            <field name="date" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Settlement Summary">
+                            <field name="total_expenses" readonly="1"/>
+                            <field name="expense_difference" readonly="1"/>
+                            <field name="difference_type" readonly="1" widget="badge"
+                                   decoration-success="difference_type == 'in_favor_driver'"
+                                   decoration-warning="difference_type == 'in_favor_company'"
+                                   decoration-info="difference_type == 'balanced'"/>
+                        </group>
+                    </group>
+
+                    <field name="notes" placeholder="Notes..."/>
+
+                    <notebook>
+                        <page string="Trip Expenses" name="trip_expenses">
+                            <field name="expense_ids"
+                                   readonly="state in ('paid','rejected')">
+                                <list editable="bottom"
+                                      decoration-success="state == 'confirmed'"
+                                      decoration-muted="state == 'canceled'">
+                                    <field name="date"/>
+                                    <field name="expense_type"/>
+                                    <field name="amount"/>
+                                    <field name="account_id"
+                                           options="{'no_create': True}"/> 
+                                    <field name="notes"/>
+                                    <field name="invoice_image" widget="many2many_binary"/>
+                                    <field name="confirmed_by" readonly="1"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'draft'"
+                                           decoration-success="state == 'confirmed'"
+                                           decoration-muted="state == 'canceled'"/>
+                                    <button name="action_confirm"
+                                            string="Confirm"
+                                            type="object"
+                                            class="btn-sm btn-success"
+                                            invisible="state == 'confirmed'"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group>
+                                <group/>
+                                <group string="Expense Summary">
+                                    <field name="amount" string="Advance Disbursed" readonly="1"/>
+                                    <field name="total_expenses" readonly="1"/>
+                                    <field name="expense_difference" readonly="1"/>
+                                    <field name="difference_type" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_driver_advance_search" model="ir.ui.view">
+        <field name="name">driver.advance.search</field>
+        <field name="model">driver.advance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="driver_id"/>
+                <field name="trip_id"/>
+                <separator/>
+                <filter string="In Settlement" name="in_settlement"
+                        domain="[('state','=','in_settlement')]"/>
+                <filter string="Fully Settled"  name="paid"
+                        domain="[('state','=','paid')]"/>
+                <filter string="Rejected"       name="rejected"
+                        domain="[('state','=','rejected')]"/>
+                <separator/>
+                <filter string="Driver" name="group_driver"
+                        context="{'group_by': 'driver_id'}"/>
+                <filter string="Trip"   name="group_trip"
+                        context="{'group_by': 'trip_id'}"/>
+                <filter string="Month"  name="group_month"
+                        context="{'group_by': 'date:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_driver_advance" model="ir.actions.act_window">
+        <field name="name">Driver Advances</field>
+        <field name="res_model">driver.advance</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No driver advances yet. Create one!
+            </p>
+        </field>
+    </record>
+
+</odoo>
