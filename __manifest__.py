@@ -12,13 +12,11 @@
     "data": [
         'data/ir_sequence_data.xml',
         'security/ir.model.access.csv',
+        'data/mail_template_data.xml',
+        "reports/report_waybill.xml",
         'views/freight_trip_view.xml',
+        "wizard/send_mail_view.xml",
         'views/driver_advance_view.xml',
-        
-
-
-
-
     ],
     "assets": {
         
