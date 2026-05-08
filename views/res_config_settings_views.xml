@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_freight" model="ir.ui.view">
+        <field name="name">res.config.settings.view.freight</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Freight System" string="Freight System" name="freight_management_system">
+                    <block title="Accounting for Advances" name="freight_accounting_setting_container">
+                        <setting id="driver_advance_account_setting" string="Driver Advance Account" help="Credit account for driver advance journal entries">
+                            <field name="driver_advance_account_id"/>
+                        </setting>
+                        <setting id="driver_advance_journal_setting" string="Driver Advance Journal" help="Journal used for driver advance entries">
+                            <field name="driver_advance_journal_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
