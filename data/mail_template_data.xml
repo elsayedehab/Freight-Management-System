@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+                 <record id="email_template_freight_waybill" model="mail.template">
+            <field name="name">Freight Trip - Waybill to Customer</field>
+            <field name="model_id" ref="Freight_Management_System.model_freight_trip"/>
+            <field name="subject">بوليصة الشحن - رحلة رقم: {{ object.name }}</field>
+            <field name="email_from">{{ (object.company_id.email or '') }}</field>
+            <field name="email_to">{{ (object.partner_id.email or '') }}</field>
+            <field name="body_html" type="html">
+                <div style="direction: rtl; font-family: Arial, sans-serif; font-size: 14px; color: #000; text-align: right; line-height: 1.8;">
+                    <p>السادة / <t t-out="object.partner_id.name"/> المحترمين</p>
+                    <p>تحية طيبة وبعد،</p>
+                    <p>
+                        نود إفادتكم بأنه تم إصدار بوليصة الشحن الخاصة بالرحلة رقم:
+                        <br/>
+                        <strong><t t-out="object.name"/></strong>
+                    </p>
+                    <p>
+                        مسار الرحلة:
+                        <br/>
+                        <strong>
+                            <t t-out="object.starting_point_id.name"/>
+                            &#160;→&#160;
+                            <t t-out="object.destination_id.name"/>
+                        </strong>
+                    </p>
+                    <p>
+                        يرجى التكرم بالاطلاع على البوليصة المرفقة، والتواصل معنا في حال وجود أي استفسارات أو ملاحظات.
+                    </p>
+                    <p>شاكرين تعاونكم الدائم.</p>
+                    <br/>
+                    <p style="margin: 0;">مع أطيب التحيات،</p>
+                </div>
+            </field>
+            <field name="report_template_ids" eval="[(4, ref('Freight_Management_System.action_report_waybill'))]"/>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+
+
+       
+
+        <record id="email_template_trip_confirmed" model="mail.template">
+            <field name="name">Freight Trip: Confirmed (Auto)</field>
+            <field name="model_id" ref="Freight_Management_System.model_freight_trip"/>
+            <field name="subject">تم تأكيد رحلتكم: {{ object.name }}</field>
+            <field name="email_from">{{ (object.company_id.email or '') }}</field>
+            <field name="email_to">{{ (object.partner_id.email or '') }}</field>
+            <field name="body_html" type="html">
+                <div style="direction: rtl; font-family: Arial, sans-serif; font-size: 14px; color: #000; text-align: right; line-height: 1.8;">
+                    <p>السادة / <t t-out="object.partner_id.name"/> المحترمين</p>
+                    <p>تحية طيبة وبعد،</p>
+                    <p>
+                        نود إفادتكم بأنه تم <strong>تأكيد</strong> الرحلة رقم:
+                        <br/>
+                        <strong><t t-out="object.name"/></strong>
+                        وهي الآن قيد التجهيز.
+                    </p>
+                    <p>
+                        مسار الرحلة:
+                        <br/>
+                        <strong>
+                            <t t-out="object.starting_point_id.name"/>
+                            &#160;→&#160;
+                            <t t-out="object.destination_id.name"/>
+                        </strong>
+                    </p>
+                    <p>يرجى التواصل معنا في حال وجود أي استفسارات أو ملاحظات.</p>
+                    <p>شاكرين تعاونكم الدائم.</p>
+                    <br/>
+                    <p style="margin: 0;">مع أطيب التحيات،</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="email_template_trip_in_transit" model="mail.template">
+            <field name="name">Freight Trip: In Transit (Auto)</field>
+            <field name="model_id" ref="Freight_Management_System.model_freight_trip"/>
+            <field name="subject">رحلتكم الآن في الطريق: {{ object.name }}</field>
+            <field name="email_from">{{ (object.company_id.email or '') }}</field>
+            <field name="email_to">{{ (object.partner_id.email or '') }}</field>
+            <field name="body_html" type="html">
+                <div style="direction: rtl; font-family: Arial, sans-serif; font-size: 14px; color: #000; text-align: right; line-height: 1.8;">
+                    <p>السادة / <t t-out="object.partner_id.name"/> المحترمين</p>
+                    <p>تحية طيبة وبعد،</p>
+                    <p>
+                        نود إفادتكم بأن الرحلة رقم:
+                        <br/>
+                        <strong><t t-out="object.name"/></strong>
+                        قد تحركت الآن وهي في طريقها إليكم.
+                    </p>
+                    <p>
+                        مسار الرحلة:
+                        <br/>
+                        <strong>
+                            <t t-out="object.starting_point_id.name"/>
+                            &#160;→&#160;
+                            <t t-out="object.destination_id.name"/>
+                        </strong>
+                    </p>
+                    <p><strong>بيانات الناقل:</strong></p>
+                    <p style="margin: 0;">السائق: <t t-out="object.driver_id.name"/></p>
+                    <p style="margin: 0;">الجوال: <t t-out="object.driver_phone"/></p>
+                    <p style="margin: 0;">الشاحنة: <t t-out="object.vehicle_id.name"/> (<t t-out="object.license_plate"/>)</p>
+                    <br/>
+                    <p>يرجى التواصل معنا في حال وجود أي استفسارات أو ملاحظات.</p>
+                    <p>شاكرين تعاونكم الدائم.</p>
+                    <br/>
+                    <p style="margin: 0;">مع أطيب التحيات،</p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>
