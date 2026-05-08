@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_waybill" model="ir.actions.report">
+        <field name="name">Waybill</field>
+        <field name="model">freight.trip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">Freight_Management_System.report_waybill_template</field>
+        <field name="report_file">Freight_Management_System.report_waybill_template</field>
+        <field name="binding_model_id" ref="model_freight_trip"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_waybill_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <style>
+                        /* Force LTR on entire waybill to prevent Odoo RTL inheritance */
+                        .wb-root {
+                            direction: ltr !important;
+                            font-family: Arial, sans-serif;
+                            font-size: 9px;
+                            color: #000;
+                            padding: 0;
+                            margin: 0;
+                            border: 2px solid #000;
+                        }
+
+                        /* ── HEADER ── */
+                        .wb-header {
+                            text-align: center;
+                            padding: 10px;
+                            border-bottom: 2px solid #000;
+                            background: #fff;
+                            direction: ltr;
+                        }
+                        .wb-logo {
+                            max-height: 75px;
+                            max-width: 240px;
+                        }
+
+                        /* ── SHARED ROW ── */
+                        .wb-row {
+                            display: table;
+                            width: 100%;
+                            border-bottom: 1px solid #000;
+                            border-collapse: collapse;
+                        }
+                        .wb-col-en {
+                            display: table-cell;
+                            width: 50%;
+                            padding: 5px 8px;
+                            border-right: 1px solid #000;
+                            vertical-align: top;
+                            direction: ltr;
+                            text-align: left;
+                        }
+                        .wb-col-ar {
+                            display: table-cell;
+                            width: 50%;
+                            padding: 5px 8px;
+                            vertical-align: top;
+                            direction: rtl;
+                            text-align: right;
+                        }
+
+                        /* ── TITLE ── */
+                        .wb-title-en { font-size: 11px; font-weight: bold; }
+                        .wb-title-ar { font-size: 11px; font-weight: bold; }
+
+                        /* ── LABELS / UNDERLINES ── */
+                        .lbl { font-weight: bold; font-size: 8px; }
+                        .uline {
+                            display: inline-block;
+                            min-width: 90px;
+                            border-bottom: 1px solid #555;
+                            font-size: 8.5px;
+                            padding: 0 2px;
+                        }
+
+                        /* ── POLICY TEXT ── */
+                        .wb-policy { font-size: 7px; line-height: 1.45; }
+                        .wb-policy-title {
+                            font-weight: bold;
+                            font-size: 8px;
+                            display: block;
+                            margin-bottom: 3px;
+                        }
+
+                        /* ── ADDRESS FIELDS ── */
+                        .wb-field-row {
+                            display: table;
+                            width: 100%;
+                            margin-bottom: 3px;
+                        }
+                        .wb-field-lbl {
+                            display: table-cell;
+                            font-weight: bold;
+                            font-size: 7.5px;
+                            white-space: nowrap;
+                            padding-right: 4px;
+                            vertical-align: bottom;
+                            width: 1%;
+                        }
+                        .wb-field-val {
+                            display: table-cell;
+                            border-bottom: 1px solid #999;
+                            font-size: 8px;
+                            padding: 0 2px 1px 2px;
+                        }
+
+                        /* ── CARGO TABLE ── */
+                        .wb-cargo {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 7.5px;
+                            direction: ltr;
+                        }
+                        .wb-cargo th {
+                            background: #1a3a5c;
+                            color: #fff;
+                            padding: 4px 3px;
+                            text-align: center;
+                            border: 1px solid #000;
+                            font-size: 7px;
+                        }
+                        .wb-cargo th.hm-col { background: #c0392b; }
+                        .wb-cargo td {
+                            padding: 4px 3px;
+                            border: 1px solid #bbb;
+                            text-align: center;
+                            font-size: 7.5px;
+                            height: 16px;
+                        }
+                        .wb-cargo .th-ar {
+                            font-size: 6px;
+                            font-weight: normal;
+                            display: block;
+                        }
+
+                        /* ── SIGNATURE BLOCKS ── */
+                        .wb-sig-table {
+                            display: table;
+                            width: 100%;
+                            border-top: 1px solid #000;
+                        }
+                        .wb-sig-cell {
+                            display: table-cell;
+                            width: 33.3%;
+                            padding: 6px 8px;
+                            border-right: 1px solid #000;
+                            font-size: 7.5px;
+                            vertical-align: top;
+                            direction: ltr;
+                            text-align: left;
+                        }
+                        .wb-sig-cell.ar {
+                            border-right: none;
+                            direction: rtl;
+                            text-align: right;
+                        }
+                        .wb-sig-line {
+                            border-bottom: 1px solid #000;
+                            margin-top: 22px;
+                            margin-bottom: 2px;
+                        }
+
+                        /* ── EMERGENCY BAR ── */
+                        .wb-emerg-table {
+                            display: table;
+                            width: 100%;
+                            border-top: 2px solid #c0392b;
+                        }
+                        .wb-emerg-en {
+                            display: table-cell;
+                            width: 50%;
+                            padding: 4px 8px;
+                            border-right: 1px solid #bbb;
+                            color: #c0392b;
+                            font-weight: bold;
+                            font-size: 7.5px;
+                            direction: ltr;
+                            text-align: left;
+                            vertical-align: middle;
+                        }
+                        .wb-emerg-ar {
+                            display: table-cell;
+                            width: 50%;
+                            padding: 4px 8px;
+                            color: #c0392b;
+                            font-weight: bold;
+                            font-size: 7.5px;
+                            direction: rtl;
+                            text-align: right;
+                            vertical-align: middle;
+                        }
+
+                        /* ── FOOTER CONTACT ── */
+                        .wb-footer-contact {
+                            direction: ltr;
+                            text-align: center;
+                            font-size: 7px;
+                            color: #555;
+                            padding: 4px 8px;
+                            border-top: 1px solid #ddd;
+                            margin-top: 4px;
+                        }
+                        .wb-footer-contact a {
+                            color: #c0392b;
+                            text-decoration: none;
+                        }
+                    </style>
+
+                    <div class="wb-root">
+
+                        <!-- ══ HEADER: Logo ══ -->
+                        <div class="wb-header">
+                            <img
+                                t-att-src="'/web/image/res.company/%s/logo' % doc.company_id.id"
+                                class="wb-logo"
+                                alt="MCL Progressive Logistics"
+                            />
+                        </div>
+
+                        <!-- ══ TITLE BAR ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <span class="wb-title-en">STRAIGHT BILL OF LADING – ORIGINAL – NOT NEGOTIABLE</span>
+                            </div>
+                            <div class="wb-col-ar">
+                                <span class="wb-title-ar">سند شحن مباشر – أصلي – غير قابل للتفاوض</span>
+                            </div>
+                        </div>
+
+                        <!-- ══ CARRIER LINE ══
+                             EN: Carrier = Driver name only | Carrier's No. = removed
+                             AR: الناقل = Driver name only
+                        ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <span class="lbl">Carrier: </span>
+                                <span class="uline"><t t-esc="doc.driver_id.name or ''"/></span>
+                            </div>
+                            <div class="wb-col-ar">
+                                <span class="lbl">الناقل: </span>
+                                <span class="uline"><t t-esc="doc.driver_id.name or ''"/></span>
+                            </div>
+                        </div>
+
+                        <!-- ══ POLICY BLOCK ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <span class="wb-policy-title">AT</span>
+                                <div class="wb-policy">
+                                    RECEIVED, subject to individually determined rates or contracts that have been agreed upon
+                                    in writing between the carrier and shipper, if applicable, otherwise to the rates,
+                                    classifications and rules that have been established by the carrier and are available to
+                                    the shipper, on request; and all applicable state and federal regulations. The carrier
+                                    agrees to carry to destination if on its route, otherwise to deliver to another carrier on
+                                    the route to said destination. Services performed hereunder shall be subject to all the
+                                    conditions not prohibited by law, whether printed or written, including the conditions on
+                                    the back hereof, which are hereby agreed to by the shipper and acknowledged for himself
+                                    and his assigns.
+                                </div>
+                            </div>
+                            <div class="wb-col-ar">
+                                <span class="wb-policy-title">في</span>
+                                <div class="wb-policy">
+                                    البضاعة الموضحة أدناه في حالة جيدة ظاهرية. باستثناء ما هو مذكور (محتويات وحالة
+                                    محتويات الطرود غير معروفة)، والموسومة، والمخصصة، والوجهة كما هو موضح أدناه،
+                                    والتي توافق الشركة المذكورة (مفهوم كلمة "شركة" في هذا العقد على أنها أي شركة أصول
+                                    أو شراكة أو كيان قانوني آخر) على نقلها إلى الوجهة إذا كانت على مسارها، وإلا تسليمها
+                                    إلى ناقل آخر على المسار إلى الوجهة المذكورة. يتم الاتفاق بشكل متبادل على أن كل ناقل
+                                    أو أي جزء من هذه البضاعة على كامل أو أي جزء من مسار الوجهة يعمل فقط كوكيل وليس
+                                    كأمين عهدة. تخضع الخدمات التي سيتم أداؤها بموجب هذا العقد لجميع الشروط غير
+                                    المحظورة بموجب القانون، والمذكورة هنا، بما في ذلك تلك الشروط المدرجة على ظهر هذا
+                                    المستند، والتي يوافق عليها المرسل ويقر بها لنفسه ولمن يخصه.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ══ TO / FROM ADDRESSES ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <div class="wb-field-row">
+                                    <div class="wb-field-lbl">TO / Consignee:</div>
+                                    <div class="wb-field-val"><t t-esc="doc.partner_id.name or ''"/></div>
+                                </div>
+                                <div class="wb-field-row">
+                                    <div class="wb-field-lbl">Destination:</div>
+                                    <div class="wb-field-val"><t t-esc="doc.destination_id.name or ''"/></div>
+                                </div>
+                                <div class="wb-field-row">
+                                    <div class="wb-field-lbl">Route:</div>
+                                    <div class="wb-field-val">
+                                        <t t-esc="doc.starting_point_id.name or ''"/>
+                                        <t t-if="doc.starting_point_id and doc.destination_id"> &#x2192; </t>
+                                        <t t-esc="doc.destination_id.name or ''"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wb-col-ar">
+                                <div class="wb-field-row">
+                                    <div class="wb-field-lbl" style="padding-right:0;padding-left:4px;">المرسل إليه:</div>
+                                    <div class="wb-field-val"><t t-esc="doc.partner_id.name or ''"/></div>
+                                </div>
+                                <div class="wb-field-row">
+                                    <div class="wb-field-lbl" style="padding-right:0;padding-left:4px;">الوجهة:</div>
+                                    <div class="wb-field-val"><t t-esc="doc.destination_id.name or ''"/></div>
+                                </div>
+                                <div class="wb-field-row">
+                                    <div class="wb-field-lbl" style="padding-right:0;padding-left:4px;">المسار:</div>
+                                    <div class="wb-field-val">
+                                        <t t-esc="doc.starting_point_id.name or ''"/>
+                                        <t t-if="doc.starting_point_id and doc.destination_id"> &#x2192; </t>
+                                        <t t-esc="doc.destination_id.name or ''"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ══ DELIVERING CARRIER ══
+                             EN: Delivering Carrier = Vehicle name | Vehicle No. = License plate
+                             AR: الناقل المسؤول عن التسليم = Vehicle name | رقم البركة = License plate
+                        ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <span class="lbl">Delivering Carrier: </span>
+                                <span class="uline"><t t-esc="doc.vehicle_id.name or ''"/></span>
+                                &#160;&#160;
+                                <span class="lbl">Vehicle No.: </span>
+                                <span class="uline"><t t-esc="doc.license_plate or ''"/></span>
+                            </div>
+                            <div class="wb-col-ar">
+                                <span class="lbl">الناقل المسؤول عن التسليم: </span>
+                                <span class="uline"><t t-esc="doc.vehicle_id.name or ''"/></span>
+                                &#160;&#160;
+                                <span class="lbl">رقم البركة: </span>
+                                <span class="uline"><t t-esc="doc.license_plate or ''"/></span>
+                            </div>
+                        </div>
+
+                        <!-- ══ CARGO TABLE ══ -->
+                        <div style="border-bottom:1px solid #000;">
+                            <table class="wb-cargo">
+                                <thead>
+                                    <tr>
+                                        <th class="hm-col" rowspan="2">HM</th>
+                                        <th rowspan="2">
+                                            ID. Number
+                                            <span class="th-ar">رقم التعريف</span>
+                                        </th>
+                                        <th rowspan="2" style="min-width:120px;">
+                                            Description Of Articles
+                                            <span class="th-ar">وصف البضائع</span>
+                                        </th>
+                                        <th rowspan="2">
+                                            Hazard Class
+                                            <span class="th-ar">فئة الخطر</span>
+                                        </th>
+                                        <th colspan="2">
+                                            Total Quantity
+                                            <span class="th-ar">الكمية الإجمالية</span>
+                                        </th>
+                                        <th rowspan="2">
+                                            Weight (KG)
+                                            <span class="th-ar">الوزن</span>
+                                        </th>
+                                        <th rowspan="2">
+                                            Class / Rate
+                                            <span class="th-ar">الفئة / السعر</span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th style="font-size:6.5px;">Pkg.</th>
+                                        <th style="font-size:6.5px;">Grp.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>&#160;</td>
+                                        <td><t t-esc="doc.container_no or ''"/></td>
+                                        <td style="text-align:left;padding:3px 5px;"><t t-esc="doc.cargo_type or ''"/></td>
+                                        <td>&#160;</td>
+                                        <td>&#160;</td>
+                                        <td>&#160;</td>
+                                        <td><t t-esc="'%.2f KG' % (doc.weight_kg or 0)"/></td>
+                                        <td>&#160;</td>
+                                    </tr>
+                                    <tr><td colspan="8">&#160;</td></tr>
+                                    <tr><td colspan="8">&#160;</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ══ CUSTOMS / DECLARATION ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <span class="lbl">Declaration No.: </span>
+                                <span class="uline"><t t-esc="doc.declaration_no or ''"/></span>
+                                &#160;
+                                <span class="lbl">Customs Card No.: </span>
+                                <span class="uline"><t t-esc="doc.customs_card_no or ''"/></span>
+                                &#160;
+                                <span class="lbl">Distance: </span>
+                                <span class="uline"><t t-esc="'%.0f KM' % (doc.distance_km or 0)"/></span>
+                            </div>
+                            <div class="wb-col-ar">
+                                <span class="lbl">رقم الإقرار: </span>
+                                <span class="uline"><t t-esc="doc.declaration_no or ''"/></span>
+                                &#160;
+                                <span class="lbl">رقم البطاقة الجمركية: </span>
+                                <span class="uline"><t t-esc="doc.customs_card_no or ''"/></span>
+                                &#160;
+                                <span class="lbl">المسافة: </span>
+                                <span class="uline"><t t-esc="'%.0f كم' % (doc.distance_km or 0)"/></span>
+                            </div>
+                        </div>
+
+                        <!-- ══ FREIGHT CHARGES ══ -->
+                        <div class="wb-row">
+                            <div class="wb-col-en">
+                                <span class="lbl">TOTAL CHARGES (Nawlon): </span>
+                                <span class="uline">
+                                    <t t-esc="'%.2f' % (doc.total_invoice_amount or 0)"/>
+                                    &#160;<t t-esc="doc.currency_id.name or ''"/>
+                                </span>
+                                &#160;&#160;
+                                <span class="lbl">FREIGHT CHARGES: </span>
+                                <span class="uline">
+                                    <t t-esc="'%.2f' % (doc.freight_charge or 0)"/>
+                                    &#160;<t t-esc="doc.currency_id.name or ''"/>
+                                </span>
+                            </div>
+                            <div class="wb-col-ar">
+                                <span class="lbl">إجمالي الرسوم: </span>
+                                <span class="uline">
+                                    <t t-esc="'%.2f' % (doc.total_invoice_amount or 0)"/>
+                                    &#160;<t t-esc="doc.currency_id.name or ''"/>
+                                </span>
+                                &#160;
+                                <span class="lbl">رسوم الشحن: </span>
+                                <span class="uline">
+                                    <t t-esc="'%.2f' % (doc.freight_charge or 0)"/>
+                                    &#160;<t t-esc="doc.currency_id.name or ''"/>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- ══ SIGNATURES ══
+                             Middle cell: changed from Driver signature line to Supervisor signature image
+                        ══ -->
+                        <div class="wb-sig-table">
+                            <div class="wb-sig-cell">
+                                <div><span class="lbl">SHIPPER: </span><t t-esc="doc.partner_id.name or ''"/></div>
+                                <div style="margin-top:3px;">
+                                    <span class="lbl">PER: </span>
+                                    <t t-esc="doc.partner_id.phone or ''"/>
+                                </div>
+                                <div style="margin-top:3px;">
+                                    <span class="lbl">DATE: </span>
+                                    <t t-esc="doc.supervisor_signature_date and doc.supervisor_signature_date.strftime('%Y-%m-%d') or ''"/>
+                                </div>
+                            </div>
+                            <div class="wb-sig-cell">
+                                <div><span class="lbl">CARRIER / DRIVER: </span><t t-esc="doc.driver_id.name or ''"/></div>
+                                <div style="margin-top:3px;">
+                                    <span class="lbl">PER: </span>
+                                    <t t-esc="doc.driver_phone or ''"/>
+                                </div>
+                            </div>
+                            <div class="wb-sig-cell ar">
+                                <div><span class="lbl">المرسل: </span><t t-esc="doc.partner_id.name or ''"/></div>
+                                <div style="margin-top:3px;">
+                                    <span class="lbl">بواسطة: </span>
+                                    <t t-esc="doc.partner_id.phone or ''"/>
+                                </div>
+                                <div style="margin-top:3px;">
+                                    <span class="lbl">التاريخ: </span>
+                                    <t t-esc="doc.supervisor_signature_date and doc.supervisor_signature_date.strftime('%Y-%m-%d') or ''"/>
+                                </div>
+                                <!-- Supervisor signature in AR cell -->
+                                <t t-if="doc.supervisor_signature">
+                                    <div style="margin-top:6px;font-size:7px;font-weight:bold;">توقيع المشرف</div>
+                                    <div style="margin-top:3px;">
+                                        <img t-att-src="'data:image/png;base64,' + doc.supervisor_signature.decode('utf-8')"
+                                             style="max-height:45px;max-width:110px;display:block;"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                
+
+                    </div><!-- /wb-root -->
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
