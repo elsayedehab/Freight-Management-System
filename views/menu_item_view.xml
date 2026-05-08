@@ -1,0 +1,30 @@
+<odoo>
+    <menuitem id="menu_freight_root" 
+              name="Freight System" 
+              web_icon="freight_management_system,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_freight_shipments"
+              name="Shipments"
+              parent="menu_freight_root"
+              action="action_freight_trip"
+              sequence="10"/>
+
+    <menuitem id="menu_driver_advance"
+          name="Driver Advance"
+          parent="menu_freight_root"
+          action="action_driver_advance"
+          sequence="20"/>
+
+    <menuitem id="menu_trip_expenses"
+          name="Trip Expenses"
+          parent="menu_freight_root"
+          action="action_trip_expense"
+          sequence="30"/>
+
+    <menuitem id="menu_invoiced_list"
+          name="Invoice"
+          parent="menu_freight_root"
+          action="account.action_move_out_invoice"
+          sequence="40"/>
+</odoo>
