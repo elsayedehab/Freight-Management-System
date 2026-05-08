@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_freight_trip_send_mail_form" model="ir.ui.view">
+        <field name="name">freight.trip.send.mail.form</field>
+        <field name="model">freight.trip.send.mail</field>
+        <field name="arch" type="xml">
+            <form string="Send Waybill by Email">
+                <sheet>
+                    <group>
+                        <field name="trip_id"    readonly="1"/>
+                        <field name="email_from"/>
+                        <field name="email_to"   required="1"/>
+                        <field name="subject"    required="1"/>
+                    </group>
+                    <group>
+                        <field name="body" widget="html" nolabel="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_send"
+                            string="📧 Send Email"
+                            type="object"
+                            class="oe_highlight"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_trip_send_mail" model="ir.actions.act_window">
+        <field name="name">Send Waybill by Email</field>
+        <field name="res_model">freight.trip.send.mail</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
